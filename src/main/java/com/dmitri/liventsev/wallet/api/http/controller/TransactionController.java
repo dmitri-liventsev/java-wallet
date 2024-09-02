@@ -26,13 +26,13 @@ public class TransactionController {
     @PostMapping("/transaction")
     public ResponseEntity<Transaction> createTransaction(
             @RequestBody CreateTransactionRequest request,
-            @RequestHeader("sourceType") String sourceTypeHeader) {
+            @RequestHeader("Source-Type") String sourceTypeHeader) {
 
         Transaction.Source source = getSource(sourceTypeHeader);
         Transaction transaction = transactionTransformer.transform(request, source);
         Transaction createdTransaction = createTransactionService.createTransaction(transaction);
 
-        return new ResponseEntity<>(createdTransaction, HttpStatus.CREATED);
+        return new ResponseEntity<>(createdTransaction, HttpStatus.ACCEPTED);
     }
 
     private Transaction.Source getSource(String sourceType) {

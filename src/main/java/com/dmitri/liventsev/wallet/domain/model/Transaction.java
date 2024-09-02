@@ -1,5 +1,7 @@
 package com.dmitri.liventsev.wallet.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -115,11 +117,32 @@ public class Transaction {
     public enum Source {
         GAME,
         WEB,
-        CORRECTION,
+        CORRECTION
     }
 
     public enum Action {
-        WIN,
-        LOST
+        WIN("win"),
+        LOST("lost");
+
+        private final String value;
+
+        Action(String value) {
+            this.value = value;
+        }
+
+        @JsonValue
+        public String getValue() {
+            return value;
+        }
+
+        @JsonCreator
+        public static Action fromValue(String value) {
+            for (Action action : Action.values()) {
+                if (action.value.equalsIgnoreCase(value)) {
+                    return action;
+                }
+            }
+            throw new IllegalArgumentException("Unknown action: " + value);
+        }
     }
 }

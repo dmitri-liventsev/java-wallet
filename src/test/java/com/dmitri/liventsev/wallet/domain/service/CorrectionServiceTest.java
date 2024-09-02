@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -41,11 +43,16 @@ public class CorrectionServiceTest {
 
     private CorrectionService correctionService;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @BeforeEach
     void setUp() {
         correctionService = new CorrectionService(correctionRepository, transactionRepository, createTransactionService, applicationContext);
         correctionService.setSelf(new CorrectionService(correctionRepository, transactionRepository, createTransactionService, applicationContext));
+        jdbcTemplate.execute("TRUNCATE TABLE transaction RESTART IDENTITY");
     }
+
 
     @Test
     void testCorrectionIsReady() {
@@ -96,7 +103,7 @@ public class CorrectionServiceTest {
         transactionHelper.createDoneTransaction(15);
 
         correctionService.performCorrection();
-
+        List<Transaction> transactions = transactionRepository.findAll();
         oddTransaction = transactionRepository.findById(oddTransaction.getId()).orElse(new Transaction());
         assertEquals(Transaction.Status.CANCELLED, oddTransaction.getStatus());
     }
@@ -108,7 +115,7 @@ public class CorrectionServiceTest {
         Transaction evenTransaction = transactionHelper.createDoneTransaction(15);
 
         correctionService.performCorrection();
-
+        List<Transaction> transactions = transactionRepository.findAll();
         evenTransaction = transactionRepository.findById(evenTransaction.getId()).orElse(new Transaction());
         assertEquals(Transaction.Status.DONE, evenTransaction.getStatus());
     }

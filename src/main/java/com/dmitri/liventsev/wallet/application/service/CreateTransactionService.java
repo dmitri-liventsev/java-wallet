@@ -5,6 +5,8 @@ import com.dmitri.liventsev.wallet.domain.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class CreateTransactionService {
 
@@ -17,6 +19,8 @@ public class CreateTransactionService {
 
     public Transaction createTransaction(Transaction transaction) {
         transaction.setStatus(Transaction.Status.NEW);
+        transaction.setCreatedAt(LocalDateTime.now());
+        transaction.setUpdatedAt(LocalDateTime.now());
 
         return transactionRepository.save(transaction);
     }

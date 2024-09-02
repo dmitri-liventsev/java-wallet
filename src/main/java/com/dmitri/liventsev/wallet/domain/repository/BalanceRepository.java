@@ -1,8 +1,10 @@
 package com.dmitri.liventsev.wallet.domain.repository;
 
 import com.dmitri.liventsev.wallet.domain.model.Balance;
+import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
@@ -16,8 +18,4 @@ public interface BalanceRepository extends JpaRepository<Balance, Integer> {
     void setBalance(long newBalance);
 
     boolean existsById(int id);
-
-    @Modifying
-    @Query(value = "LOCK TABLE Balance IN SHARE MODE", nativeQuery = true)
-    void lockTable();
 }

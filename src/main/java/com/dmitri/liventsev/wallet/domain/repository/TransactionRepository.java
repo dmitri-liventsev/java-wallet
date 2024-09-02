@@ -9,12 +9,12 @@ import java.util.List;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long>, TransactionLockableRepository {
-    @Query("SELECT t FROM Transaction t WHERE t.source != 'correction' AND MOD(t.id, 2) <> 0 AND t.status = 'done'")
+    @Query("SELECT t FROM Transaction t WHERE t.source != 'CORRECTION' AND MOD(t.id, 2) <> 0 AND t.status = 'DONE'")
     List<Transaction> findOddTransactions(int limit);
 
-    @Query("SELECT t FROM Transaction t WHERE t.status = 'processing' ORDER BY t.createdAt ASC")
+    @Query("SELECT t FROM Transaction t WHERE t.status = 'PROCESSING' ORDER BY t.createdAt ASC")
     List<Transaction> findProcessingTransactionsSortedByCreatedAt();
 
-    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.status = 'done'")
+    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.status = 'DONE'")
     long calculateBalance();
 }

@@ -10,7 +10,7 @@ public class TransactionTransformer {
         Transaction transaction = new Transaction();
         transaction.setAction(request.getAction());
 
-        transaction.setAmount(request.getAmount() * 100);
+        transaction.setAmount(request.getAmount());
         if (request.getAction().equals(Transaction.Action.LOST) && request.getAmount() > 0) {
             throw new IllegalArgumentException("Lost transaction amount must be greater than zero");
         }

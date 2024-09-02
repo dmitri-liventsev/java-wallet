@@ -9,9 +9,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Stack;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Profile("!test")
@@ -36,23 +34,26 @@ public class TransactionProcessingService {
     public void processTransactionsContinuously() {
         processTransactions();
     }
-    
+
+    @Transactional
     protected void processTransactions() {
         transactionRepository.lock(lockId);
-        Stack<Transaction> stack = getProcessingTransactions();
-
-        while (!stack.isEmpty() && stack.peek().getLockId().equals(lockId)) {
-            Transaction transaction = stack.pop();
+        Queue<Transaction> queue = getProcessingTransactions();
+        while (!queue.isEmpty() && queue.peek().getLockId().equals(lockId)) {
+            Transaction transaction = queue.poll();
+            if (transaction == null) {
+                continue;
+            }
             getSelf().processTransaction(transaction);
         }
     }
 
-    @Transactional
     public void processTransaction(Transaction transaction) {
         long currentBalance = balanceRepository.getCurrentBalance();
         long newBalance = currentBalance + transaction.getAmount();
 
         if (newBalance >= 0 || transaction.getSource() == Transaction.Source.CORRECTION) {
+            System.out.println("Initial balance: " + currentBalance + ". Amount: " + transaction.getAmount() + " New balance: " + newBalance);
             balanceRepository.setBalance(newBalance);
             transaction.setStatus(Transaction.Status.DONE);
         } else {
@@ -62,13 +63,12 @@ public class TransactionProcessingService {
         transactionRepository.save(transaction);
     }
 
-    private Stack<Transaction> getProcessingTransactions() {
+    private Queue<Transaction> getProcessingTransactions() {
         List<Transaction> list = transactionRepository.findProcessingTransactionsSortedByCreatedAt();
 
-        Stack<Transaction> stack = new Stack<>();
-        stack.addAll(list);
+        Queue<Transaction> queue = new LinkedList<>(list);
 
-        return stack;
+        return queue;
     }
 
     private TransactionProcessingService getSelf() {

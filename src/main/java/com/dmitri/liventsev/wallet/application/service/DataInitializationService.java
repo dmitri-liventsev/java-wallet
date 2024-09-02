@@ -36,8 +36,6 @@ public class DataInitializationService {
     @PostConstruct
     @Transactional
     public void initialize() {
-        lockTables();
-
         if (!correctionRepository.existsById(1)) {
             Correction correction = new Correction();
             correction.setId(1);
@@ -54,16 +52,5 @@ public class DataInitializationService {
             balance.setAmount(transactionRepository.calculateBalance());
             balanceRepository.save(balance);
         }
-    }
-
-    private void lockTables() {
-        String profile = env.getActiveProfiles()[0];
-
-        if (Objects.equals(profile, "test")) {
-            return;
-        }
-
-        correctionRepository.lockTable();
-        balanceRepository.lockTable();
     }
 }

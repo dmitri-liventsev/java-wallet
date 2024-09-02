@@ -14,8 +14,4 @@ public interface CorrectionRepository extends JpaRepository<Correction, Long>, C
     Optional<Correction> findByLockId(UUID lockId);
 
     boolean existsById(int id);
-
-    @Modifying
-    @Query(value = "LOCK TABLE Correction IN SHARE MODE", nativeQuery = true)
-    void lockTable();
 }
